@@ -1,0 +1,23 @@
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <p>&copy; 2016 Company, Inc.</p>
+        </div>
+    </div>
+</footer>
+
+
+
+<script>
+    $(function () {
+        $('.navbar li a').each(function(){
+            if($($(this))[0].href==window.location.href){
+                $(this).parents('li').addClass('active');
+            }
+        });
+    })
+</script>
+
+</body>
+</html>

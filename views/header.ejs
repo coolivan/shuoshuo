@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+</head>
+
+<style>
+    .jumbotron {
+        padding-top: 100px;
+    }
+    .img-circle{
+        width: 100px;
+    }
+    .main{
+        padding-top: 100px;
+    }
+    footer{
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+</style>
+
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand hidden-sm" href="" >demo</a>
+        </div>
+        <div class="navbar-collapse collapse" role="navigation">
+            <ul class="nav navbar-nav">
+                <li><a href="/">首页</a></li>
+                <li><a href="/me">我的说说</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right hidden-sm">
+                <% if(!login){ %>
+                <li><a href="/regist">注册</a></li>
+                <li><a href="/login">登录</a></li>
+                <% }else{ %>
+                <li><a>欢迎 <%= username %> !</a></li>
+                <li><a href="/settings">个人资料</a></li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+

@@ -1,0 +1,194 @@
+<% include header.ejs %>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/cropper.min.css">
+<link rel="stylesheet" href="/css/main.css">
+
+<div class="container main">
+    <!-- Example row of columns -->
+    <div class="row">
+        <div class="col-md-9">
+            <div class="img-container">
+                <img id="image" src="/avatars/<%= avatar %>" alt="Picture">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="preview">
+                <div class="img-preview preview-lg"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-9 docs-buttons">
+
+            <div class="btn-group">
+                <form enctype="multipart/form-data" id="addForm">
+                    <label class="btn btn-primary btn-upload" for="inputImage" title="Upload image file">
+                        <input type="file" class="sr-only" id="inputImage" name="file" accept=".jpg,.jpeg,.png,.gif,.bmp,.tiff">
+                        <span class="fa fa-upload"></span>
+                        <span>上传</span>
+                    </label>
+                </form>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary" id="crop" data-method="crop" title="Crop">
+                  <span class="fa fa-check"></span>
+                  <span>剪切</span>
+                </button>
+            </div>
+    </div>
+
+</div> <!-- /container -->
+
+    <script src="/js/cropper.js"></script>
+
+    <script>
+        $(function () {
+
+            var $previews = $('.preview');
+            var $image = $('#image');
+
+            $image.cropper({
+                aspectRatio: 1 / 1,
+                rotatable: true,
+
+                ready: function (e) {
+                    var $clone = $(this).clone().removeClass('cropper-hidden');
+
+                    $clone.css({
+                        display: 'block',
+                        width: '100%',
+                        minWidth: 0,
+                        minHeight: 0,
+                        maxWidth: 'none',
+                        maxHeight: 'none'
+                    });
+
+                    $previews.css({
+                        width: '100%',
+                        overflow: 'hidden'
+                    }).html($clone);
+                },
+
+
+                crop: function (e) {
+                    var imageData = $(this).cropper('getImageData');
+                    var previewAspectRatio = e.width / e.height;
+
+                    $previews.each(function () {
+                        var $preview = $(this);
+                        var previewWidth = $preview.width();
+                        var previewHeight = previewWidth / previewAspectRatio;
+                        var imageScaledRatio = e.width / previewWidth;
+
+                        $preview.height(previewHeight).find('img').css({
+                            width: imageData.naturalWidth / imageScaledRatio,
+                            height: imageData.naturalHeight / imageScaledRatio,
+                            marginLeft: -e.x / imageScaledRatio,
+                            marginTop: -e.y / imageScaledRatio
+                        });
+                    });
+                    // console.log(imageData);
+                }
+
+            });
+
+
+
+            // Import image
+            var $inputImage = $('#inputImage');
+            var URL = window.URL || window.webkitURL;
+            var blobURL;
+
+            if (URL) {
+                $inputImage.change(function () {
+                    var files = this.files;
+                    var file;
+
+                    if (!$image.data('cropper')) {
+                        return;
+                    }
+
+                    if (files && files.length) {
+                        file = files[0];
+
+                        if (/^image\/\w+$/.test(file.type)) {
+                            blobURL = URL.createObjectURL(file);
+                            $image.one('built.cropper', function () {
+
+                                // Revoke when load complete
+                                URL.revokeObjectURL(blobURL);
+                            }).cropper('reset').cropper('replace', blobURL);
+
+                            // console.log(blobURL);
+                            var data = new FormData($('#addForm')[0]);  //获取表单内容
+                            ajaxFormPost("/doupload",data,function(result){  //ajax提交表单
+                                if(result == "-1"){
+                                    alert("上传失败");
+                                }
+                            });
+
+                            $inputImage.val('');
+                        } else {
+                            window.alert('Please choose an image file.');
+                        }
+                    }
+                });
+            } else {
+                $inputImage.prop('disabled', true).parent().addClass('disabled');
+            };
+
+
+            //ajax Post方法封装
+            function ajaxFormPost(url,formData,callBack){
+                $.ajax({
+                    type:'POST',
+                    dataType:'text',
+                    processData: false,  // 告诉JSLite不要去处理发送的数据
+                    contentType: false,   // 告诉JSLite不要去设置Content-Type请求头
+                    data:formData,
+                    url:url,
+                    success:function(data){
+                        data = JSON.parse(data);
+                        callBack(data);
+                    },
+                    error:function(data){
+                        console.log('error:',data)
+                        callBack(data);
+                    }
+                });
+            };//ajax
+
+            //Cut image
+            $("#crop").click(function(){
+                var e = $image.cropper('getData');
+                $.post("/docut",{
+                    "x":e.x,
+                    "y":e.y,
+                    "w":e.width,
+                    "h":e.height
+                },function (result) {
+                    if (result == "-2"){
+                        alert("请上传新图片");
+                        return;
+                    }
+                    if(result == "-1"){
+                        alert("剪切失败");
+                        return;
+                    }
+                    if(result == "-3"){
+                        alert("更新失败");
+                        return;
+                    }
+                    window.location.href="/";
+                });
+            });//click
+
+
+        })
+    </script>
+
+<% include footer.ejs %>
